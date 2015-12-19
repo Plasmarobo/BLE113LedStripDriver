@@ -1,0 +1,135 @@
+const MAX_METERS = 15 #5m per strip
+const MAX_LEDS = 480 #160 leds per m
+
+
+dim meters 
+dim led_count
+dim i
+dim color(3)
+
+dim pixel_ptr
+dim strip_ptr
+const STRIP_SIZE = 1441 #480 * 3 + 1
+dim strip(1441) #max bytes in buffer
+dim zeros(15)
+
+dim test_fsm
+
+procedure write_spi(bytes, data)
+	call hardware_io_port_write(1,1,1)
+	call hardware_spi_transfer(0,bytes, data)
+	call hardware_io_port_write(1,1,0)
+end
+
+procedure set_color(v)
+	strip(strip_ptr) = v
+	strip_ptr = strip_ptr + 1
+end
+
+procedure set_pixel(r,g,b)
+	strip_ptr = pixel_ptr * 3
+	call set_color(g | $80)
+	call set_color(r | $80)
+	call set_color(b | $80)
+	pixel_ptr = pixel_ptr + 1
+	if pixel_ptr > MAX_LEDS
+		pixel_ptr = 0
+	end if
+end
+
+procedure init_buffers()
+	i = 0
+	while(i < STRIP_SIZE)
+		strip(i) = 80
+		i = i + 1
+	end while
+	i = 0
+	while(i < MAX_METERS)
+		zeros(i) = 0
+		i = i + 1
+	end while
+end
+
+procedure write_strip()
+	call write_spi(pixel_ptr+1, strip(0:pixel_ptr+1))
+end
+
+procedure write_reset()
+	#Hard maximum 15 meters
+	pixel_ptr = 0
+	call write_spi(meters, zeros(0:meters))
+end
+
+procedure set_strip_info(num_leds)
+	led_count = num_leds
+	meters = (led_count+31)/32
+end
+
+
+
+#Listen for boot
+event system_boot(major, minor, patch, build,ll_version, protocol,hw)
+	call set_strip_info(160)
+
+	call hardware_io_port_config_direction(1,1) #P1.0 is output
+	call hardware_io_port_write(1,1,0)
+	
+	call gap_set_adv_parameters(320, 480, 7)
+
+    # put module into discoverable/connectable mode
+    call gap_set_mode(gap_general_discoverable, gap_undirected_connectable)
+	call init_buffers()
+	call write_reset()
+	
+	#Test FSM
+	test_fsm = 0
+	call hardware_set_soft_timer(32768, 1, 0)
+	
+end
+
+
+
+
+#Listen for bluetooth
+event connection_status(connection, flags, address, address_type, conn_interval, timeout, latency, bonding)
+
+end
+
+event connection_disconnected(handle, result)
+end
+
+event attributes_value(connection, reason, handle, offset, vlen, value_data)
+	if handle = c_led_data then
+		call set_pixel(value_data(1), value_data(0), value_data(2))
+	end if
+end
+
+
+
+event hardware_soft_timer(handle)
+	if test_fsm = 0 then
+		call set_pixel(255, 0, 0)
+		call write_strip()
+		test_fsm = 1
+	else
+		if test_fsm = 1 then
+			call set_pixel(0, 255, 0)
+			call write_strip()
+			test_fsm = 2
+		else
+			if test_fsm = 3 then
+				call set_pixel(0,0,255)
+				call write_strip()
+				test_fsm = 3
+			else
+				call write_reset()
+				call set_pixel(0,0,0)
+				call set_pixel(0,0,0)
+				call set_pixel(0,0,0)
+				call write_strip()
+				call write_reset()
+				test_fsm = 0
+			end if
+		end if
+	end if
+end

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project>
+    <gatt in="strip_driver_gatt.xml" />
+    <hardware in="hardware.xml" />
+    <script in="strip_driver.bgs" />
+	<config in="config.xml" />
+    <device type="ble113" />
+    <image out="strip_driver.hex" />
+</project>
