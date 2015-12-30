@@ -1,64 +1,122 @@
 const MAX_METERS = 15 #5m per strip
 const MAX_LEDS = 480 #160 leds per m
 
-
 dim meters 
 dim led_count
 dim i
-dim color(3)
 
-dim pixel_ptr
-dim strip_ptr
-const STRIP_SIZE = 1441 #480 * 3 + 1
-dim strip(1441) #max bytes in buffer
+dim color_ptr
+#Create a 4 part buffer
+dim stripA(256)
+dim stripB(256)
+dim stripC(256)
+dim stripD(256)
+dim stripE(256)
+dim stripF(256)
 dim zeros(15)
 
 dim test_fsm
 
-procedure write_spi(bytes, data)
+procedure write_pixels()
 	call hardware_io_port_write(1,1,1)
-	call hardware_spi_transfer(1,bytes, data)
+	
+	if (color_ptr < 256)
+		call hardware_spi_transfer(1, color_ptr, stripA(0:color_ptr) )
+	else
+		call hardware_spi_transfer(1, 256, stripA(0:256) )
+		color_ptr = color_ptr - 256
+		
+		if (color_ptr < 512)
+			call hardware_spi_transfer(1, color_ptr, stripB(0:color_ptr))
+		else 
+			call hardware_spi_transfer(1, 256, stripB(0:256) )
+			color_ptr = color_ptr - 256
+			
+			if (color_ptr < 768)
+				call hardware_spi_transfer(1, color_ptr, stripC(0:color_ptr))
+			else 
+				call hardware_spi_transfer(1, 256, stripC(0:256))
+				color_ptr = color_ptr - 256
+				
+				if (color_ptr < 1024)
+					call hardware_spi_transfer(1, color_ptr, stripD(0:color_ptr))
+				else 
+					call hardware_spi_transfer(1, 256, stripD(0:256))
+					color_ptr = color_ptr - 256
+					
+					if (color_ptr < 1280)
+						call hardware_spi_transfer(1, color_ptr, stripE(0:color_ptr))
+					else 
+						call hardware_spi_transfer(1, 256, stripE(0:256))
+						color_ptr = color_ptr - 256
+						
+						if (color_ptr < 1536)
+							call hardware_spi_transfer(1, color_ptr, stripF(0:color_ptr))
+							
+						else
+							color_ptr = color_ptr - 256
+							call hardware_spi_transfer(1, 256, stripF(0:256))
+						end if
+					end if
+				end if
+			end if
+		end if
+	end if
+	
 	call hardware_io_port_write(1,1,0)
 end
 
 procedure set_color(v)
-	strip(strip_ptr) = v
-	strip_ptr = strip_ptr + 1
-end
-
-procedure set_pixel(r,g,b)
-	strip_ptr = pixel_ptr * 3
-	call set_color(g | $80)
-	call set_color(r | $80)
-	call set_color(b | $80)
-	pixel_ptr = pixel_ptr + 1
-	if pixel_ptr > MAX_LEDS
-		pixel_ptr = 0
+	if (color_ptr < 256)
+		stripA(color_ptr:1) = v
+	else
+		if (color_ptr < 512)
+			stripB((color_ptr-256):1) = v
+		else 
+			if (color_ptr < 768)
+				stripC((color_ptr-512):1) = v
+			else 
+				if (color_ptr < 1024)
+					stripD((color_ptr-768):1) = v
+				else 
+					if (color_ptr < 1280)
+						stripE((color_ptr-1024):1) = v
+					else 
+						if (color_ptr < 1536)
+							stripF((color_ptr-1280):1) = v
+						end if
+					end if
+				end if
+			end if
+		end if
 	end if
+	color_ptr = color_ptr + 1
 end
 
-procedure init_buffers()
-	i = 0
-	while(i < STRIP_SIZE)
-		strip(i) = $80
-		i = i + 1
-	end while
-	i = 0
-	while(i < MAX_METERS)
-		zeros(i) = 0
-		i = i + 1
-	end while
-end
-
-procedure write_strip()
-	call write_spi(pixel_ptr+1, strip(0:pixel_ptr+1))
+#Values should have the high bit set
+procedure set_rgb(r, g, b)
+	#Little endian, grb -> brg
+	call set_color(b | $80)
+	call set_color(r | $80)
+	call set_color(g | $80)
 end
 
 procedure write_reset()
 	#Hard maximum 15 meters
-	pixel_ptr = 0
-	call write_spi(meters, zeros(0:meters))
+	color_ptr = 0
+	call hardware_spi_transfer(1, meters, "\x00\x00\x00\x00\x00")
 end
+
+procedure blank_strip()
+	i = 0
+	while(i < led_count)
+		call set_rgb(0,0,0)
+		i = i + 1
+	end while
+	#call write_pixels()
+	call write_reset()
+end
+
 
 procedure set_strip_info(num_leds)
 	led_count = num_leds
@@ -69,22 +127,30 @@ end
 
 #Listen for boot
 event system_boot(major, minor, patch, build,ll_version, protocol,hw)
+	color_ptr = 0
 	call set_strip_info(160)
 
 	call hardware_io_port_config_direction(1,1) #P1.0 is output
-	call hardware_io_port_write(1,1,0)
+	call hardware_io_port_write(1,1,1)
 	
 	call gap_set_adv_parameters(320, 480, 7)
 
     # put module into discoverable/connectable mode
     call gap_set_mode(gap_general_discoverable, gap_undirected_connectable)
-	call init_buffers()
+
 	call write_reset()
-	
-	#Test FSM
-	test_fsm = 0
-	call hardware_set_soft_timer(32768, 1, 0)
-	
+	call blank_strip()
+	call set_rgb($8,0,0)
+	call set_rgb(0,0,0)
+	call set_rgb(0,0,0)
+	call set_rgb($0,$10, 0)
+	call set_rgb(0,0,0)
+	call set_rgb(0,0,0)
+	call set_rgb(0,0,$10)
+	call write_pixels()
+	call write_reset()
+	call hardware_io_port_write(1,1,0)
+	#call hardware_set_soft_timer(32768, 1, 0)
 end
 
 
@@ -100,26 +166,19 @@ end
 
 event attributes_value(connection, reason, handle, offset, vlen, value_data)
 	if handle = c_led_data then
-		call set_pixel(value_data(1), value_data(0), value_data(2))
+		call set_rgb(value_data(1), value_data(0), value_data(2))
 	end if
 end
 
 
 
 event hardware_soft_timer(handle)
-	call hardware_spi_transfer(1, 1, "\xFF")
-	call set_pixel(255, 0, 0)
-	call write_strip()
-	call set_pixel(0, 255, 0)
-	call write_strip()
-	call set_pixel(0,0,255)
-	call write_strip()
+	call set_rgb($00,$00,$27)
+	call set_rgb(0,127,0)
+	call set_rgb(127,0,0)
+	call set_rgb(0,0,0)
+	call set_rgb(0,0,0)
+	call set_rgb(0,0,0)
+	call write_pixels()
 	call write_reset()
-	call set_pixel(0,0,0)
-	call set_pixel(0,0,0)
-	call set_pixel(0,0,0)
-	call write_strip()
-	call write_reset()
-	
-	call hardware_spi_transfer(1, 1, "\xFE")
 end

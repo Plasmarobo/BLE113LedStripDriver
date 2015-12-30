@@ -1,4 +1,4 @@
-1483
+1571
 0:0	GAP_AD_FLAG_BREDR_NOT_SUPPORTED
 0:0	GAP_AD_FLAG_GENERAL_DISCOVERABLE
 0:0	GAP_AD_FLAG_LIMITED_DISCOVERABLE
@@ -86,10 +86,12 @@
 0:4	meters
 4:4	led_count
 8:4	i
-12:3	color
-15:4	pixel_ptr
-19:4	strip_ptr
-23:0	STRIP_SIZE
-23:1441	strip
-1464:15	zeros
-1479:4	test_fsm
+12:4	color_ptr
+16:256	stripA
+272:256	stripB
+528:256	stripC
+784:256	stripD
+1040:256	stripE
+1296:256	stripF
+1552:15	zeros
+1567:4	test_fsm
