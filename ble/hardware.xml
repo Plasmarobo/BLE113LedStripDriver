@@ -6,11 +6,15 @@
 			polarity="negative"
 			phase="0"
 			endianness="msb" 
-			baud="115200" 
-			endpoint="none"/>
+			baud="57600" 
+			endpoint="none"
+			flow="false"/>
 	<script enable="true" />
+	<script_timeout value="0" />
 	<sleeposc enable="false" />
     <usb enable="false" endpoint="none" />
     <sleep enable="false" />
     <txpower power="15" bias="5" />
+	<connections value="1" />
+	<throughput optimize="performance" />
 </hardware>
