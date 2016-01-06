@@ -57,7 +57,7 @@
             <description>Strip Driver Command</description>
             <properties write="true" indicate="true" />
 			<!-- 24 bits per LED -->
-            <value variable_length="false" length="1" type="user" />
+            <value variable_length="true" length="8" type="user" />
         </characteristic>
 
     </service>

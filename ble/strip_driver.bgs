@@ -8,7 +8,7 @@ dim i
 
 dim write_ptr
 dim read_ptr
-dim start
+
 #Create a 4 part buffer
 dim stripA(256)
 dim stripB(256)
@@ -16,7 +16,6 @@ dim stripC(256)
 dim stripD(256)
 dim stripE(256)
 dim stripF(256)
-dim zeros(15)
 
 procedure write_pixels()
 	read_ptr = 0
@@ -109,6 +108,7 @@ procedure set_rgb(r, g, b)
 end
 
 
+dim start
 
 #Listen for boot
 event system_boot(major, minor, patch, build,ll_version, protocol,hw)
@@ -150,9 +150,16 @@ event attributes_value(connection, reason, handle, offset, vlen, value_data)
 		end while
 	else
 		if handle = c_led_cmd then
+			#CMD API
+			#0 : Call write
+			#1 + (u16) : set LED count
 			if (value_data(0:1) = 0)
 				call write_pixels()
 				call write_reset()
+			else 
+				if (value_data(0:1) = 1)
+					call set_strip_info(value_data(1:2))
+				end if
 			end if
 		end if
 	end if

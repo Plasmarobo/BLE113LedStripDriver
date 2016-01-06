@@ -1,4 +1,4 @@
-1575
+1560
 0:0	GAP_AD_FLAG_BREDR_NOT_SUPPORTED
 0:0	GAP_AD_FLAG_GENERAL_DISCOVERABLE
 0:0	GAP_AD_FLAG_LIMITED_DISCOVERABLE
@@ -90,11 +90,10 @@
 8:4	i
 12:4	write_ptr
 16:4	read_ptr
-20:4	start
-24:256	stripA
-280:256	stripB
-536:256	stripC
-792:256	stripD
-1048:256	stripE
-1304:256	stripF
-1560:15	zeros
+20:256	stripA
+276:256	stripB
+532:256	stripC
+788:256	stripD
+1044:256	stripE
+1300:256	stripF
+1556:4	start
