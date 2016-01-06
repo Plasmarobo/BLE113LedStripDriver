@@ -28,7 +28,7 @@ void setup (void)
 ISR (SPI_STC_vect)
 {
 byte c = SPDR;  // grab byte from SPI Data Register
-  Serial.println ("SPI interrupt");
+  //Serial.println ("SPI interrupt");
   Serial.println (c);
 }  // end of interrupt routine SPI_STC_vect
 
