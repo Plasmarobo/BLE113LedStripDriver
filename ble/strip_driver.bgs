@@ -1,5 +1,6 @@
 const MAX_METERS = 15 #5m per strip
 const MAX_LEDS = 480 #160 leds per m
+const MAX_DATA_LEN = 1440
 
 dim meters 
 dim led_count
@@ -7,6 +8,7 @@ dim i
 
 dim write_ptr
 dim read_ptr
+dim start
 #Create a 4 part buffer
 dim stripA(256)
 dim stripB(256)
@@ -112,6 +114,7 @@ end
 event system_boot(major, minor, patch, build,ll_version, protocol,hw)
 	write_ptr = 0
 	read_ptr = 0
+	start = 0
 	call set_strip_info(160)
 
 	#call hardware_io_port_config_direction(1,1) #P1.0 is output
@@ -124,7 +127,7 @@ event system_boot(major, minor, patch, build,ll_version, protocol,hw)
     call gap_set_mode(gap_general_discoverable, gap_undirected_connectable)
 	call blank_strip()
 	
-	call hardware_set_soft_timer(65335, 2, 1)
+	call hardware_set_soft_timer($1000, 2, 1)
 end
 
 
@@ -140,7 +143,18 @@ end
 
 event attributes_value(connection, reason, handle, offset, vlen, value_data)
 	if handle = c_led_data then
-		call set_rgb(value_data(1), value_data(0), value_data(2))
+		i = (vlen+1)/3
+		while( i > 0)
+			call set_rgb(value_data(i:1), value_data(i+1:1), value_data(i+2:1))
+			i = i - 1
+		end while
+	else
+		if handle = c_led_cmd then
+			if (value_data(0:1) = 0)
+				call write_pixels()
+				call write_reset()
+			end if
+		end if
 	end if
 end
 
@@ -151,13 +165,27 @@ event hardware_soft_timer(handle)
 	
 		call hardware_io_port_write(1,1,1)
 		call blank_strip()
-		call set_rgb(30,0,0)
-		call set_rgb(0,30,0)
-		call set_rgb(0,0,30)
+		i = 0
+		while(i < (led_count/3))
+			if(i >= start)
+				call set_rgb(10,0,0)
+				call set_rgb(0,10,0)
+				call set_rgb(0,0,10)
+			else
+				call set_rgb(0,0,0)
+				call set_rgb(0,0,0)
+				call set_rgb(0,0,0)
+			end if
+			i = i + 1
+		end while
 		call write_pixels()
+		start = start + 1
+		if (start > (led_count+1)/3)
+			start = 0
+		end if
 		call hardware_io_port_write(1,1,0)
 	else
 		call hardware_io_port_write(1,2,0)
-		call hardware_set_soft_timer(32768, 1, 0)
+		call hardware_set_soft_timer($1000, 1, 0)
 	end if
 end

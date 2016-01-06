@@ -9,7 +9,7 @@
         <characteristic uuid="2A00" id="c_device_name">
             <description>Device Name</description>
             <properties read="true" const="true" />
-            <value length="16" variable_length="true">LED Strip Driver</value>
+            <value length="16" variable_length="true">LED Strip</value>
         </characteristic>
 
         <!-- 2A01: org.bluetooth.characteristic.gap.appearance -->
@@ -47,10 +47,17 @@
 
         <!-- custom characteristic for acknowledged status and control point -->
         <characteristic uuid="f408b6c7-06c0-4b4a-8493-50bc261ea9e7" id="c_led_data">
-            <description>LED Strip Driver Characteristic</description>
+            <description>LED RGB Data</description>
             <properties write="true" indicate="true" />
 			<!-- 24 bits per LED -->
             <value variable_length="true" length="20" type="user" />
+        </characteristic>
+		
+		<characteristic uuid="f408b6c7-06c0-4b4a-8493-50bc261ea9e8" id="c_led_cmd">
+            <description>Strip Driver Command</description>
+            <properties write="true" indicate="true" />
+			<!-- 24 bits per LED -->
+            <value variable_length="false" length="1" type="user" />
         </characteristic>
 
     </service>
