@@ -46,3 +46,16 @@ Network Trash Folder
 Temporary Items
 .apdisk
 *.hex
+
+# Android studio
+.gradle
+local.properties
+.idea
+build/
+*.apk
+*.ap_
+*.dex
+*.class
+bin/
+gen/
+obj/
