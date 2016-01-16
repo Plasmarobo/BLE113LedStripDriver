@@ -14,10 +14,12 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,6 +34,11 @@ public class FindDevice extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_find_device);
+        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+            Toast.makeText(this, "BLE Not Supported",
+                    Toast.LENGTH_SHORT).show();
+            finish();
+        }
     }
 
     @Override
@@ -46,7 +53,7 @@ public class FindDevice extends Activity {
         BluetoothAdapter adapter = manager.getAdapter();
         if (adapter == null)
         {
-            Log.e("Adapter Acquisition Failed", "unknown error");
+            Log.e("Adapter Acq Failed", "unknown error");
             finish();
             System.exit(1);
 
@@ -112,7 +119,7 @@ public class FindDevice extends Activity {
         {
             if(res == Activity.RESULT_CANCELED)
             {
-                Log.e("Adapter Acquisition Failed", "Permission denied");
+                Log.e("Adapter Acq Failed", "Permission denied");
                 finish();
                 System.exit(1);
             }

@@ -7,10 +7,14 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.le.ScanFilter;
+import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.media.Image;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -24,7 +28,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 public class LEDControl extends Activity {
@@ -46,10 +52,12 @@ public class LEDControl extends Activity {
     private BluetoothGatt gatt_service;
     private BluetoothGattCharacteristic rgb_gatt;
     private BluetoothGattCharacteristic cmd_gatt;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         bt = null;
+
         if(getIntent().getExtras() != null) {
             bt = getIntent().getExtras().getParcelable("BluetoothDevice");
 
@@ -165,6 +173,16 @@ public class LEDControl extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if ( gatt_service == null) {
+            return;
+        }
+        gatt_service.close();
+        gatt_service = null;
+        super.onDestroy();
     }
 
 
