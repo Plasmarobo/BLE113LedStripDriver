@@ -44,6 +44,7 @@ public class FindDevice extends Activity {
     ScanCallback sc;
     HashMap<String, BluetoothDevice> devices;
     List<HashMap<String, String>> fillMaps;
+    SimpleAdapter listadapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,7 +63,7 @@ public class FindDevice extends Activity {
         deviceList.setOnItemClickListener(new ListView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String name = (String)parent.getItemAtPosition(position);
+                String name = (String) parent.getItemAtPosition(position);
                 BluetoothDevice btDevice = devices.get(name);
                 Intent i = new Intent(getApplicationContext(), LEDControl.class);
                 i.putExtra("BluetoothDevice", btDevice);
@@ -99,10 +100,24 @@ public class FindDevice extends Activity {
     protected void updateResults(ScanResult r)
     {
         Log.i("ScanResult - Results", r.toString());
-        devices.put(r.getDevice().getName(), r.getDevice());
-        HashMap<String, String> map = new HashMap<String, String>();
+        devices.put(r.getDevice().getAddress(), r.getDevice());
+        HashMap<String, String> map;
+        for(HashMap<String, String> row : fillMaps) {
+            String addr1 = row.get("mac");
+            String addr2 = r.getDevice().getAddress();
+            if(addr1.equals(addr2))
+            {
+                row.put("devicename", r.getDevice().getName());
+                row.put("rssi", Integer.toString(r.getRssi()));
+                row.put("mac", r.getDevice().getAddress());
+                return;
+            }
+        }
+        map = new HashMap<String, String>();
         map.put("devicename", r.getDevice().getName());
         map.put("rssi", Integer.toString(r.getRssi()));
+        map.put("mac", r.getDevice().getAddress());
+
         fillMaps.add(map);
     }
 
@@ -110,36 +125,34 @@ public class FindDevice extends Activity {
     {
         List<ScanFilter> filters = new ArrayList<>();
         filters.add(new ScanFilter.Builder()
-                .setDeviceName("LED Strip")
-                .setServiceUuid(android.os.ParcelUuid.fromString("47f1de41-c535-414f-a747-1184246636c6"))
+                //.setDeviceName("LED Strip")
+                //.setServiceUuid(android.os.ParcelUuid.fromString("47f1de41-c535-414f-a747-1184246636c6"))
                 .build());
         ScanSettings ss = new ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
                 .build();
         le = adapter.getBluetoothLeScanner();
-        final Context c = this;
+        String[] from = new String[] {"devicename", "rssi", "mac"};
+        int[] to = new int[] {R.id.devicename, R.id.rssi, R.id.mac};
+        listadapter = new SimpleAdapter(this, fillMaps, R.layout.device_row, from, to);
+        deviceList.setAdapter(listadapter);
         sc = new ScanCallback() {
             @Override
             public void onScanResult(int callbackType, ScanResult result) {
+
                 updateResults(result);
-                String[] from = new String[] {"devicename", "rssi"};
-                int[] to = new int[] {R.id.devicename, R.id.rssi};
-                SimpleAdapter adapter = new SimpleAdapter(c, fillMaps, R.layout.device_row, from, to);
-                deviceList.setAdapter(adapter);
+                listadapter.notifyDataSetChanged();
             }
 
             @Override
             public void onBatchScanResults(List<ScanResult> results) {
-                String[] from = new String[] {"devicename", "rssi"};
-                int[] to = new int[] {R.id.devicename, R.id.rssi};
 
                 for (ScanResult r : results) {
 
                     updateResults(r);
                 }
 
-                SimpleAdapter adapter = new SimpleAdapter(c, fillMaps, R.layout.device_row, from, to);
-                deviceList.setAdapter(adapter);
+                listadapter.notifyDataSetChanged();
             }
 
             @Override
