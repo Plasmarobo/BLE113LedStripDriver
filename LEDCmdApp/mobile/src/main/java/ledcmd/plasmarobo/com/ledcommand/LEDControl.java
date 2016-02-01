@@ -44,9 +44,9 @@ public class LEDControl extends Activity {
     private Button clear;
     private Button set_led_count;
     private EditText led_count;
-    private byte red_value;
-    private byte green_value;
-    private byte blue_value;
+    private int red_value;
+    private int green_value;
+    private int blue_value;
     private String color_buffer;
     private BluetoothDevice bt;
     private BluetoothGatt gatt_service;
@@ -96,9 +96,9 @@ public class LEDControl extends Activity {
         this.onColorChanged = new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                red_value = (byte)red.getProgress();
-                green_value = (byte)green.getProgress();
-                blue_value = (byte)blue.getProgress();
+                red_value = red.getProgress();
+                green_value = green.getProgress();
+                blue_value = blue.getProgress();
                 preview.setBackgroundColor(Color.rgb(red_value, green_value, blue_value));
             }
 
@@ -119,9 +119,9 @@ public class LEDControl extends Activity {
 
             @Override
             public void onClick(View v) {
-                color_buffer += red_value;
-                color_buffer += green_value;
-                color_buffer += blue_value;
+                color_buffer += (byte)red_value;
+                color_buffer += (byte)green_value;
+                color_buffer += (byte)blue_value;
             }
         });
         write.setOnClickListener(new Button.OnClickListener() {

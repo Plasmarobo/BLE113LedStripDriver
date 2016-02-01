@@ -63,11 +63,11 @@ public class FindDevice extends Activity {
         deviceList.setOnItemClickListener(new ListView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String name = (String) parent.getItemAtPosition(position);
-                BluetoothDevice btDevice = devices.get(name);
+                le.stopScan(sc);
+                String mac = ((HashMap<String, String>)parent.getItemAtPosition(position)).get("mac");
+                BluetoothDevice btDevice = devices.get(mac);
                 Intent i = new Intent(getApplicationContext(), LEDControl.class);
                 i.putExtra("BluetoothDevice", btDevice);
-                le.stopScan(sc);
                 startActivity(i);
             }
         });
