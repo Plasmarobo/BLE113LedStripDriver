@@ -74,6 +74,7 @@ public class LEDControl extends Activity {
                 Log.i("GATT WRITE", characteristic + " (" + status + ")");
             }
         });
+        gatt_service.connect();
 
         rgb_gatt = new BluetoothGattCharacteristic(UUID.fromString("f408b6c7-06c0-4b4a-8493-50bc261ea9e7"),
                 BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE ,
@@ -185,5 +186,13 @@ public class LEDControl extends Activity {
         super.onDestroy();
     }
 
+    protected void onPause() {
+        super.onPause();
+        gatt_service.disconnect();
+    }
 
+    protected void onResume(){
+        super.onResume();
+        gatt_service.connect();
+    }
 }
