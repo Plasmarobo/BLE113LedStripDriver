@@ -17,4 +17,5 @@
     <txpower power="15" bias="5" />
 	<connections value="1" />
 	<throughput optimize="performance" />
+	<otaboot source="internal" />
 </hardware>
