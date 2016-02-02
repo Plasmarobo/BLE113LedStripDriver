@@ -6,7 +6,9 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
@@ -30,6 +32,7 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
+import java.io.Console;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -68,20 +71,53 @@ public class LEDControl extends Activity {
         }
 
         gatt_service = bt.connectGatt(this, true, new BluetoothGattCallback() {
-            @Override
-            public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-                super.onCharacteristicWrite(gatt, characteristic, status);
-                Log.i("GATT WRITE", characteristic + " (" + status + ")");
-            }
-        });
-        gatt_service.connect();
+                    @Override
+                    public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+                        super.onConnectionStateChange(gatt, status, newState);
+                        if(status == BluetoothGatt.GATT_SUCCESS)
+                        {
+                            switch (newState)
+                            {
+                                case BluetoothProfile.STATE_CONNECTED:
+                                    break;
+                                case BluetoothProfile.STATE_DISCONNECTED:
+                                    break;
+                            }
+                        }
+                    }
 
-        rgb_gatt = new BluetoothGattCharacteristic(UUID.fromString("f408b6c7-06c0-4b4a-8493-50bc261ea9e7"),
-                BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE ,
-                BluetoothGattCharacteristic.PERMISSION_WRITE);
-        cmd_gatt = new BluetoothGattCharacteristic(UUID.fromString("f408b6c7-06c0-4b4a-8493-50bc261ea9e8"),
-                BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE,
-                BluetoothGattCharacteristic.PERMISSION_WRITE);
+                    @Override
+                    public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+                        super.onServicesDiscovered(gatt, status);
+                        for(BluetoothGattService service : gatt.getServices())
+                        {
+                            Log.i("Blueooth service: ", service.getUuid().toString());
+                            for(BluetoothGattCharacteristic characteristic : service.getCharacteristics())
+                            {
+                                Log.i("  Service Char:", characteristic.getUuid().toString());
+                                if(characteristic.getUuid().compareTo(UUID.fromString("f408b6c7-06c0-4b4a-8493-50bc261ea9e7")) == 0)
+                                {
+                                    rgb_gatt = characteristic;
+                                }
+                                if(characteristic.getUuid().compareTo(UUID.fromString("f408b6c7-06c0-4b4a-8493-50bc261ea9e8")) == 0)
+                                {
+                                    cmd_gatt = characteristic;
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+                        super.onCharacteristicRead(gatt, characteristic, status);
+                    }
+
+                    @Override
+                    public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+                        super.onCharacteristicWrite(gatt, characteristic, status);
+                    }
+                });
+        gatt_service.connect();
 
         setContentView(R.layout.activity_ledcontrol);
         red = (SeekBar)findViewById(R.id.red);
