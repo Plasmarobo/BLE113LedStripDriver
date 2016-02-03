@@ -1,4 +1,4 @@
-1560
+1572
 0:0	GAP_AD_FLAG_BREDR_NOT_SUPPORTED
 0:0	GAP_AD_FLAG_GENERAL_DISCOVERABLE
 0:0	GAP_AD_FLAG_LIMITED_DISCOVERABLE
@@ -33,6 +33,7 @@
 0:0	connection_connected
 0:0	connection_encrypted
 0:0	connection_parameters_change
+0:0	device_reset
 0:0	gap_ad_type_flags
 0:0	gap_ad_type_localname_complete
 0:0	gap_ad_type_localname_short
@@ -64,6 +65,10 @@
 0:0	gap_scannable_non_connectable
 0:0	gap_undirected_connectable
 0:0	gap_user_data
+0:0	ota_control
+0:0	ota_control_wo_response
+0:0	ota_data
+0:0	ota_data_w_response
 0:0	sm_bonding_key_addr_public
 0:0	sm_bonding_key_addr_static
 0:0	sm_bonding_key_csrk
@@ -82,6 +87,8 @@
 0:0	system_endpoint_uart0
 0:0	system_endpoint_uart1
 0:0	system_endpoint_usb
+0:0	xgatt_debug
+0:0	xgatt_serial_number
 0:0	MAX_METERS
 0:0	MAX_LEDS
 0:0	MAX_DATA_LEN
@@ -97,3 +104,7 @@
 1044:256	stripE
 1300:256	stripF
 1556:4	connected
+1560:4	command
+1564:4	dfu_pointer
+1568:4	erase_page
+1572:0	MAX_ERASE_PAGE

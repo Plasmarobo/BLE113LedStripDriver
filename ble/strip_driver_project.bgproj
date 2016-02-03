@@ -11,4 +11,3 @@
     <!-- firmware=false only updates the BGScript and GATT, =true updates the BT Stack and BGAPI, but is MUCH bigger -->
 	<!-- <ota out="strip_driver.ota" firmware="true" /> -->
 </project>
-</project>
