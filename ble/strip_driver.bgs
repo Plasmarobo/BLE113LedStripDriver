@@ -19,7 +19,6 @@ dim stripF(256)
 
 dim connected
 
-
 procedure write_pixels()
 	read_ptr = 0
 	while(read_ptr < write_ptr)
@@ -116,8 +115,6 @@ event system_boot(major, minor, patch, build,ll_version, protocol,hw)
 	write_ptr = 0
 	read_ptr = 0
 	call set_strip_info(160)
-	
-	call sm_set_bondable_mode(1)
 
 	call hardware_io_port_config_direction(1,1) #P1.0 is output
 	call hardware_io_port_config_direction(1,3) #P1.1 is output
@@ -150,14 +147,7 @@ end
 
 event attributes_value(connection, reason, handle, offset, vlen, value_data)
 	call hardware_io_port_write(1,1,1)
-	if (handle = device_reset) then
-        command=value_data(0:1)
-        # Command 1 received, reset device
-        if command=1 then  
-            call system_reset(0)
-        end if
-    end if
-	
+
 	if handle = c_led_data then
 		i = (vlen+1)/3
 		while( i > 0)

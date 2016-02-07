@@ -29,47 +29,14 @@
         <characteristic uuid="2A29" id="c_manufacturer_name">
             <description>Manufacturer Name</description>
             <properties read="true" const="true" />
-            <value>GearGrin</value>
+            <value>Bluegiga</value>
         </characteristic>
 
         <!-- 2A24: org.bluetooth.characteristic.model_number_string -->
         <characteristic uuid="2A24" id="c_model_number">
             <description>Model Number</description>
             <properties read="true" const="true" />
-            <value>LEDSD-01</value>
-        </characteristic>
-		
-		<characteristic uuid="2A25" id="xgatt_serial_number">
-            <description>Serial Number String</description>
-            <properties read="true" />
-            <value length="17" />
-        </characteristic>
-
-        <characteristic uuid="2A27">
-            <description>Hardware Revision String</description>
-            <properties read="true" const="true" />
-            <value>LEDSD-01</value>
-        </characteristic>
-
-        <characteristic uuid="2A26">
-            <description>Firmware Revision String</description>
-            <properties read="true" const="true" />
-            <value>0.1.0</value>
-        </characteristic>
-
-        <characteristic uuid="2A28">
-            <description>Software Revision String</description>
-            <properties read="true" const="true" />
-            <value>0.1.0</value>
-        </characteristic>
-    </service>
-	
-	<service uuid="00766963-6172-6173-6f6c-7574696f6e73">
-        <description>Device Control</description>
-        <characteristic uuid="01766963-6172-6173-6f6c-7574696f6e73" id="device_reset">
-            <description>Device reset</description>
-            <properties write_no_response="true" />
-            <value length="1" />
+            <value>LED Strip Driver</value>
         </characteristic>
     </service>
 
@@ -80,26 +47,18 @@
         <!-- custom characteristic for acknowledged status and control point -->
         <characteristic uuid="f408b6c7-06c0-4b4a-8493-50bc261ea9e7" id="c_led_data">
             <description>LED RGB Data</description>
-            <properties write="true" indicate="true" notify="true"/>
+            <properties write="true" indicate="true" />
 			<!-- 24 bits per LED -->
             <value variable_length="true" length="20" type="user" />
         </characteristic>
 		
 		<characteristic uuid="f408b6c7-06c0-4b4a-8493-50bc261ea9e8" id="c_led_cmd">
             <description>Strip Driver Command</description>
-            <properties write="true" indicate="true" notify="true"/>
+            <properties write="true" indicate="true" />
 			<!-- 24 bits per LED -->
             <value variable_length="true" length="8" type="user" />
         </characteristic>
 
-    </service>
-    
-    <service uuid="DEADBEEF-CDCD-CDCD-CDCD-CDCDCDCDCDCD">
-        <characteristic uuid="DEADBEEF-0000-0000-0000-000000000000" id="xgatt_debug">
-            <description>Debugging output</description>
-            <properties read="true" notify="true" />
-            <value length="20" />
-        </characteristic>
     </service>
 
 </configuration>

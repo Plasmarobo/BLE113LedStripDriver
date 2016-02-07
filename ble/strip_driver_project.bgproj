@@ -5,9 +5,5 @@
     <script in="strip_driver.bgs" />
 	<config in="config.xml" />
     <device type="ble113" />
-	<boot fw="bootota" />
     <image out="strip_driver.hex" />
-	<ota out="strip_driver.ota" firmware="false" />
-    <!-- firmware=false only updates the BGScript and GATT, =true updates the BT Stack and BGAPI, but is MUCH bigger -->
-	<!-- <ota out="strip_driver.ota" firmware="true" /> -->
 </project>
