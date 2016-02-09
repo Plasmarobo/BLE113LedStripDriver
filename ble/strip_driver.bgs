@@ -17,6 +17,16 @@ dim stripD(256)
 dim stripE(256)
 dim stripF(256)
 
+dim result
+
+dim in(20) # endpoint data in
+dim in_len
+
+dim out(20) # endpoint data out
+dim out_len
+
+dim custom_adv_data(9)
+
 dim connected
 
 procedure write_pixels()
@@ -119,11 +129,15 @@ event system_boot(major, minor, patch, build,ll_version, protocol,hw)
 	call hardware_io_port_config_direction(1,1) #P1.0 is output
 	call hardware_io_port_config_direction(1,3) #P1.1 is output
 	call hardware_io_port_write(1,3,3)
-	
+	call system_endpoint_tx(5, 63, "\n\r** Boot: LED Strip system boot **\n\r")
+
 	call gap_set_adv_parameters(320, 480, 7)
+	
+    call system_endpoint_set_watermarks(5, 0, 0) # disable watermarks
 
     # put module into discoverable/connectable mode
     call gap_set_mode(gap_general_discoverable, gap_undirected_connectable)
+
 	call blank_strip()
 	call hardware_io_port_write(1,3,0)
 end
@@ -135,43 +149,117 @@ event connection_status(connection, flags, address, address_type, conn_interval,
         # Android (and iOS?) respond to connection interval updates, but cannot set them
         call connection_update(connection, 6, 10, latency, timeout)
     end if
+	call system_endpoint_tx(5, 18, "\n\r++ Connected ++\n")
 	call hardware_io_port_write(1,2,2)
     connected = 1
 end
 
-event connection_disconnected(handle, result)
+event connection_disconnected(handle, res)
 	connected = 0
 	call gap_set_mode(gap_general_discoverable, gap_undirected_connectable)
 	call hardware_io_port_write(1,2,0)
+end
+
+event attributes_status(handle, flags)
+
+    if (handle = xgatt_data) && (flags = 2) then
+    
+       call system_endpoint_tx(5, 57, "\r++ Local CCC set by remote side to start indications ++\n")
+       call system_endpoint_tx(5, 45, "\r++ Transparent data exchange can start ++\n\n\r")
+
+       call system_endpoint_set_watermarks(5, 1, 0) # set RX watermark
+       
+    end if
+
+end
+
+event system_endpoint_watermark_rx(endpoint, size)
+
+    in_len = size
+    if in_len > 20 then
+       in_len = 20
+    end if
+    call system_endpoint_set_watermarks(5, 0, $ff) # disable RX watermark
+    call system_endpoint_rx(5, in_len)(result, in_len, in(0:in_len))
+    call attributes_write(xgatt_data, 0, in_len, in(0:in_len))
+    
+end
+
+event attclient_indicated(connection, handle)
+
+    if handle = xgatt_data then
+        call system_endpoint_set_watermarks(5, 1, $ff) # set RX watermark
+    end if
+    
 end
 
 event attributes_value(connection, reason, handle, offset, vlen, value_data)
 	call hardware_io_port_write(1,1,1)
 
 	if handle = c_led_data then
+		call system_endpoint_tx(5, 57, "\r++ Setting LED Data ++\n")
 		i = (vlen+1)/3
 		while( i > 0)
 			call set_rgb(value_data(i:1), value_data(i+1:1), value_data(i+2:1))
 			i = i - 1
 		end while
-	else
-		if handle = c_led_cmd then
-			#CMD API
-			#0 : Call write
-			#1 + (u16) : set LED count
-			if (value_data(0:1) = 0)
-				call write_pixels()
-				call write_reset()
-			else 
-				if (value_data(0:1) = 1)
-					call set_strip_info(value_data(1:2))
+	end if 
+	
+	if handle = xgatt_data then
+        out(0:vlen) = value_data(0:vlen)
+        out_len = vlen
+        call system_endpoint_set_watermarks(5, $ff, out_len) # set TX watermark
+    end if
+	
+	if handle = c_led_cmd then
+		#CMD API
+		#0 : Call write
+		#1 + (u16) : set LED count
+		call system_endpoint_tx(5, 57, "\r++ Recieved Command: ")
+		if (value_data(0:1) = 0)
+			call system_endpoint_tx(5, 57, "Write Strip++\n")
+			call write_pixels()
+			call write_reset()
+		else 
+			if (value_data(0:1) = 1)
+				call set_strip_info(value_data(1:2))
+				call system_endpoint_tx(5, 57, "Set Strip info ++\n")
+			else
+				if (value_data(0:1) = 2)
+					call system_endpoint_tx(5, 57, "Blank Strip ++\n")
+					call blank_strip()
+					
 				else
-					if (value_data(0:1) = 2)
-						call blank_strip()
+					if (value_data(0:1) = 3)
+						call system_endpoint_tx(5, 57, "System Reset ++\n")
+						call system_reset(0)
 					end if
 				end if
 			end if
 		end if
 	end if
 	call hardware_io_port_write(1,1,0)
+end
+
+event system_endpoint_watermark_tx(endpoint, size)
+
+    if endpoint = 5 then
+        call system_endpoint_set_watermarks(5, $ff, 0) # disable TX watermark
+        call system_endpoint_tx(5, out_len, out(0:out_len))
+        call attributes_user_write_response(0, 0)
+    end if
+    
+end
+
+event connection_disconnected(conn, reas)
+    
+    call system_endpoint_tx(5, 22, "\n\n\r-- Disconnected --\n")
+    call system_endpoint_tx(5, 17, "\r-- Reason code: ")
+    call system_endpoint_tx(5, 2, reas)
+    call system_endpoint_tx(5, 4, " --\n")
+
+    call system_endpoint_set_watermarks(5, 0, 0) # disable watermarks
+    
+    call gap_set_mode(2, 2)
+
 end
