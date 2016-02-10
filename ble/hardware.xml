@@ -9,7 +9,7 @@
 			baud="2000000" 
 			endpoint="none"
 			flow="false"/>
-	<usart channel="1" alternate="2" baud="115200" endpoint="none" />
+	<usart channel="1" alternate="2" baud="115200" endpoint="none" flow="false" />
 	<script enable="true" />
 	<script_timeout value="0" />
 	<sleeposc enable="false" />

@@ -82,7 +82,7 @@
 0:0	system_endpoint_uart0
 0:0	system_endpoint_uart1
 0:0	system_endpoint_usb
-0:0	xgatt_data
+0:0	xgatt_debug
 0:0	MAX_METERS
 0:0	MAX_LEDS
 0:0	MAX_DATA_LEN
