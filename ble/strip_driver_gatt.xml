@@ -53,16 +53,16 @@
         <!-- custom characteristic for acknowledged status and control point -->
         <characteristic uuid="f408b6c7-06c0-4b4a-8493-50bc261ea9e7" id="c_led_data">
             <description>LED RGB Data</description>
-            <properties write="true" indicate="true" />
+            <properties write="true"/>
 			<!-- 24 bits per LED -->
-            <value variable_length="true" length="20" type="user" />
+            <value variable_length="true" length="20"/>
         </characteristic>
 		
 		<characteristic uuid="f408b6c7-06c0-4b4a-8493-50bc261ea9e8" id="c_led_cmd">
             <description>Strip Driver Command</description>
-            <properties write="true" indicate="true" />
+            <properties write="true"/>
 			<!-- 24 bits per LED -->
-            <value variable_length="true" length="8" type="user" />
+            <value variable_length="true" length="8" />
         </characteristic>
 
     </service>

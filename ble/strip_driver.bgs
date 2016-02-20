@@ -28,6 +28,32 @@ dim out_len
 dim custom_adv_data(9)
 
 dim connected
+# flexible procedure to display %02X byte arrays
+dim hex_buf(3) # [0,1] = ASCII hex representation, [2]=separator
+dim hex_index # byte array index
+procedure print_hex_bytes(endpoint, separator, reverse, b_length, b_data())
+	hex_buf(2:1) = separator
+	hex_index = 0
+	while hex_index < b_length
+		if reverse = 0 then
+			hex_buf(0:1) = (b_data(hex_index:1)/$10) + 48 + ((b_data(hex_index:1)/$10)/10*7)
+			hex_buf(1:1) = (b_data(hex_index:1)&$f) + 48 + ((b_data(hex_index:1)&$f )/10*7)
+		else
+			hex_buf(0:1) = (b_data(b_length - hex_index - 1:1)/$10) + 48 + ((b_data(b_length - hex_index - 1:1)/$10)/10*7)
+			hex_buf(1:1) = (b_data(b_length - hex_index - 1:1)&$f) + 48 + ((b_data(b_length - hex_index - 1:1)&$f )/10*7)
+		end if
+		if separator > 0 && hex_index < b_length - 1 then
+			call system_endpoint_tx(endpoint, 3, hex_buf(0:3))
+		else
+			call system_endpoint_tx(endpoint, 2, hex_buf(0:2))
+		end if
+		hex_index = hex_index + 1
+	end while
+end
+
+procedure printh(len, data())
+	call print_hex_bytes(system_endpoint_uart1, 0, 0, len, data(0:len))
+end
 
 procedure write_pixels()
 	read_ptr = 0
@@ -133,7 +159,7 @@ event system_boot(major, minor, patch, build,ll_version, protocol,hw)
 
 	call gap_set_adv_parameters(320, 480, 7)
 	
-    call system_endpoint_set_watermarks(5, 0, 0) # disable watermarks
+    call system_endpoint_set_watermarks(system_endpoint_uart1, 0, 0) # disable watermarks
 
     # put module into discoverable/connectable mode
     call gap_set_mode(gap_general_discoverable, gap_undirected_connectable)
@@ -154,20 +180,13 @@ event connection_status(connection, flags, address, address_type, conn_interval,
     connected = 1
 end
 
-event connection_disconnected(handle, res)
-	connected = 0
-	call gap_set_mode(gap_general_discoverable, gap_undirected_connectable)
-	call system_endpoint_tx(system_endpoint_uart1, 14, "Disconnected\n\r")
-	call hardware_io_port_write(1,2,0)
-end
-
 event attributes_status(handle, flags)
 
     if (handle = xgatt_debug) && (flags = 2) then
     
        call system_endpoint_tx(system_endpoint_uart1, 16, "xgatt data rec\n\r")
 
-       call system_endpoint_set_watermarks(5, 1, 0) # set RX watermark
+       call system_endpoint_set_watermarks(system_endpoint_uart1, 1, 0) # set RX watermark
        
     end if
 
@@ -179,8 +198,8 @@ event system_endpoint_watermark_rx(endpoint, size)
     if in_len > 20 then
        in_len = 20
     end if
-    call system_endpoint_set_watermarks(5, 0, $ff) # disable RX watermark
-    call system_endpoint_rx(5, in_len)(result, in_len, in(0:in_len))
+    call system_endpoint_set_watermarks(system_endpoint_uart1, 0, $ff) # disable RX watermark
+    call system_endpoint_rx(system_endpoint_uart1, in_len)(result, in_len, in(0:in_len))
     call attributes_write(xgatt_debug, 0, in_len, in(0:in_len))
     
 end
@@ -188,7 +207,7 @@ end
 event attclient_indicated(connection, handle)
 
     if handle = xgatt_debug then
-        call system_endpoint_set_watermarks(5, 1, $ff) # set RX watermark
+        call system_endpoint_set_watermarks(system_endpoint_uart1, 1, $ff) # set RX watermark
     end if
     
 end
@@ -208,38 +227,38 @@ event attributes_value(connection, reason, handle, offset, vlen, value_data)
 	if handle = xgatt_debug then
         out(0:vlen) = value_data(0:vlen)
         out_len = vlen
-        call system_endpoint_set_watermarks(5, $ff, out_len) # set TX watermark
+        call system_endpoint_set_watermarks(system_endpoint_uart1, $ff, out_len) # set TX watermark
     end if
 	
 	if handle = c_led_cmd then
 		#CMD API
 		#0 : Call write
 		#1 + (u16) : set LED count
-		call system_endpoint_tx(5, 57, "\r++ Recieved Command: ")
+		call system_endpoint_tx(system_endpoint_uart1, 57, "n\r++ Recieved Command: ")
 		if (value_data(0:1) = 0)
-			call system_endpoint_tx(5, 57, "Write Strip++\n")
+			call system_endpoint_tx(system_endpoint_uart1, 57, "Write Strip++\n\r")
 			call write_pixels()
 			call write_reset()
 		else 
 			if (value_data(0:1) = 1)
 				call set_strip_info(value_data(1:2))
-				call system_endpoint_tx(5, 57, "Set Strip info ++\n")
+				call system_endpoint_tx(system_endpoint_uart1, 57, "Set Strip info ++\n\r")
 			else
 				if (value_data(0:1) = 2)
-					call system_endpoint_tx(5, 57, "Blank Strip ++\n")
+					call system_endpoint_tx(system_endpoint_uart1, 57, "Blank Strip ++\n\r")
 					call blank_strip()
 					
 				else
 					if (value_data(0:1) = 3)
-						call system_endpoint_tx(5, 57, "System Reset ++\n")
+						call system_endpoint_tx(system_endpoint_uart1, 57, "System Reset ++\n\r")
 						call system_reset(0)
 					end if
 				end if
 			end if
 		end if
 	end if
-	call system_endpoint_tx(system_endpoint_uart1, 10, "==Data==\n\r")
-	call system_endpoint_tx(system_endpoint_uart1, vlen, value_data(0:vlen))
+	call system_endpoint_tx(system_endpoint_uart1, 10, "==Data==\n\r0x")
+	call printh(vlen, value_data(0:vlen))
 	call system_endpoint_tx(system_endpoint_uart1, 9, "\n\r==End==\n\r")
 	call hardware_io_port_write(1,1,0)
 end
@@ -247,8 +266,8 @@ end
 event system_endpoint_watermark_tx(endpoint, size)
 
     if endpoint = 5 then
-        call system_endpoint_set_watermarks(5, $ff, 0) # disable TX watermark
-        call system_endpoint_tx(5, out_len, out(0:out_len))
+        call system_endpoint_set_watermarks(system_endpoint_uart1, $ff, 0) # disable TX watermark
+        call system_endpoint_tx(system_endpoint_uart1, out_len, out(0:out_len))
         call attributes_user_write_response(0, 0)
     end if
     
@@ -265,14 +284,16 @@ event system_endpoint_watermark_rx(endpoint, size)
 end
 
 event connection_disconnected(conn, reas)
-    
-    call system_endpoint_tx(5, 22, "\n\n\r-- Disconnected --\n")
-    call system_endpoint_tx(5, 17, "\r-- Reason code: ")
-    call system_endpoint_tx(5, 2, reas)
-    call system_endpoint_tx(5, 4, " --\n")
+  
+	connected = 0
+	call hardware_io_port_write(1,2,0)
+    call system_endpoint_tx(system_endpoint_uart1, 22, "\n\r-- Disconnected --\n\r")
+    call system_endpoint_tx(system_endpoint_uart1, 17, "\n\r-- Reason code: 0x")
+    call printh(2, reas)
+    call system_endpoint_tx(system_endpoint_uart1, 2, "\n\r")
 
-    call system_endpoint_set_watermarks(5, 0, 0) # disable watermarks
+    call system_endpoint_set_watermarks(system_endpoint_uart1, 0, 0) # disable watermarks
     
-    call gap_set_mode(2, 2)
+    call gap_set_mode(gap_general_discoverable, gap_undirected_connectable)
 
 end
