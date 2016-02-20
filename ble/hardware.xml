@@ -6,7 +6,7 @@
 			polarity="negative"
 			phase="0"
 			endianness="msb" 
-			baud="2000000" 
+			baud="20000000" 
 			endpoint="none"
 			flow="false"/>
 	<usart channel="1" alternate="2" baud="115200" endpoint="none" flow="false" />
