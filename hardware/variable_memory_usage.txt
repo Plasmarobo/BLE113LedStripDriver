@@ -1,4 +1,4 @@
-1556
+1632
 0:0	GAP_AD_FLAG_BREDR_NOT_SUPPORTED
 0:0	GAP_AD_FLAG_GENERAL_DISCOVERABLE
 0:0	GAP_AD_FLAG_LIMITED_DISCOVERABLE
@@ -82,17 +82,28 @@
 0:0	system_endpoint_uart0
 0:0	system_endpoint_uart1
 0:0	system_endpoint_usb
+0:0	xgatt_debug
 0:0	MAX_METERS
 0:0	MAX_LEDS
 0:0	MAX_DATA_LEN
 0:4	meters
 4:4	led_count
 8:4	i
-12:4	write_ptr
-16:4	read_ptr
-20:256	stripA
-276:256	stripB
-532:256	stripC
-788:256	stripD
-1044:256	stripE
-1300:256	stripF
+12:4	j
+16:4	write_ptr
+20:4	read_ptr
+24:256	stripA
+280:256	stripB
+536:256	stripC
+792:256	stripD
+1048:256	stripE
+1304:256	stripF
+1560:4	result
+1564:20	in
+1584:4	in_len
+1588:20	out
+1608:4	out_len
+1612:9	custom_adv_data
+1621:4	connected
+1625:3	hex_buf
+1628:4	hex_index

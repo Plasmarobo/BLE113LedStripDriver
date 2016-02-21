@@ -38,7 +38,12 @@
             <properties read="true" const="true" />
             <value>LED Strip Driver</value>
         </characteristic>
-        
+		
+		<characteristic uuid="e7add780-b042-4876-aae1-112855353cc1" id="xgatt_debug">
+			<description>Debug Info</description>
+			<properties read="true" write="true" />
+			<value variable_length="true" type="user" />
+		</characteristic>
     </service>
 
     <!-- custom service for providing and controlling slave behavior -->
@@ -48,16 +53,16 @@
         <!-- custom characteristic for acknowledged status and control point -->
         <characteristic uuid="f408b6c7-06c0-4b4a-8493-50bc261ea9e7" id="c_led_data">
             <description>LED RGB Data</description>
-            <properties write="true" indicate="true" />
+            <properties write="true"/>
 			<!-- 24 bits per LED -->
-            <value variable_length="true" length="20" type="user" />
+            <value variable_length="true" length="20"/>
         </characteristic>
 		
 		<characteristic uuid="f408b6c7-06c0-4b4a-8493-50bc261ea9e8" id="c_led_cmd">
             <description>Strip Driver Command</description>
-            <properties write="true" indicate="true" />
+            <properties write="true"/>
 			<!-- 24 bits per LED -->
-            <value variable_length="true" length="8" type="user" />
+            <value variable_length="true" length="8" />
         </characteristic>
 
     </service>

@@ -2,5 +2,6 @@ c_device_name 3
 c_appearance 6
 c_manufacturer_name 10
 c_model_number 13
-c_led_data 17
-c_led_cmd 21
+xgatt_debug 16
+c_led_data 20
+c_led_cmd 23
