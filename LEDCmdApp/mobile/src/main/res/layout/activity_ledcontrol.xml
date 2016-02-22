@@ -114,13 +114,15 @@
             android:layout_height="wrap_content"
             android:text="Write"
             android:id="@+id/write"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:enabled="false" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Clear"
-            android:id="@+id/clear" />
+            android:id="@+id/clear"
+            android:enabled="false" />
     </LinearLayout>
 
     <TextView
@@ -145,6 +147,7 @@
         android:layout_height="wrap_content"
         android:text="Set Led Count"
         android:id="@+id/set_count"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:enabled="false" />
 
 </LinearLayout>

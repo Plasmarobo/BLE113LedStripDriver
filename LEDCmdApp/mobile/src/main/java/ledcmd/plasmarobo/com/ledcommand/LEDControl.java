@@ -38,6 +38,7 @@ import android.widget.Toast;
 
 import java.io.Console;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class LEDControl extends Activity {
@@ -54,12 +55,15 @@ public class LEDControl extends Activity {
     private int red_value;
     private int green_value;
     private int blue_value;
-    private String color_buffer;
+    private List<Byte> color_buffer;
     private LinearLayout stripPreview;
     private BluetoothDevice bt;
     private BluetoothGatt gatt_service;
     private BluetoothGattCharacteristic rgb_gatt;
     private BluetoothGattCharacteristic cmd_gatt;
+    private final UUID LED_STRIP_SERVICE = UUID.fromString("47f1de41-c535-414f-a747-1184246636c6");
+    private final UUID LED_DATA_CHARACTERISTIC = UUID.fromString("f408b6c7-06c0-4b4a-8493-50bc261ea9e7");
+    private final UUID LED_CMD_CHARACTERISTIC = UUID.fromString("f408b6c7-06c0-4b4a-8493-50bc261ea9e8");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,8 +78,10 @@ public class LEDControl extends Activity {
         {
             finish();
         }
+        rgb_gatt = null;
+        cmd_gatt = null;
 
-        gatt_service = bt.connectGatt(this, true, new BluetoothGattCallback() {
+        gatt_service = bt.connectGatt(this, false, new BluetoothGattCallback() {
                     @Override
                     public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
                         super.onConnectionStateChange(gatt, status, newState);
@@ -84,6 +90,12 @@ public class LEDControl extends Activity {
                             switch (newState)
                             {
                                 case BluetoothProfile.STATE_CONNECTED:
+                                    Log.i("BLE", "Connected to GATT server.");
+                                    Log.i("BLE", "Attempting to start service discovery:" +
+                                            gatt_service.discoverServices());
+                                    write.setEnabled(true);
+                                    clear.setEnabled(true);
+                                    set_led_count.setEnabled(true);
                                     break;
                                 case BluetoothProfile.STATE_DISCONNECTED:
                                     break;
@@ -94,22 +106,10 @@ public class LEDControl extends Activity {
                     @Override
                     public void onServicesDiscovered(BluetoothGatt gatt, int status) {
                         super.onServicesDiscovered(gatt, status);
-                        for(BluetoothGattService service : gatt.getServices())
-                        {
-                            Log.i("Blueooth service: ", service.getUuid().toString());
-                            for(BluetoothGattCharacteristic characteristic : service.getCharacteristics())
-                            {
-                                Log.i("  Service Char:", characteristic.getUuid().toString());
-                                if(characteristic.getUuid().compareTo(UUID.fromString("f408b6c7-06c0-4b4a-8493-50bc261ea9e7")) == 0)
-                                {
-                                    rgb_gatt = characteristic;
-                                }
-                                if(characteristic.getUuid().compareTo(UUID.fromString("f408b6c7-06c0-4b4a-8493-50bc261ea9e8")) == 0)
-                                {
-                                    cmd_gatt = characteristic;
-                                }
-                            }
-                        }
+                        rgb_gatt = gatt.getService(LED_STRIP_SERVICE).getCharacteristic(LED_DATA_CHARACTERISTIC);
+                        rgb_gatt.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
+                        cmd_gatt = gatt.getService(LED_STRIP_SERVICE).getCharacteristic(LED_CMD_CHARACTERISTIC);
+                        cmd_gatt.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
                     }
 
                     @Override
@@ -121,14 +121,14 @@ public class LEDControl extends Activity {
                     public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
                         super.onCharacteristicWrite(gatt, characteristic, status);
                     }
-                });
-        gatt_service.connect();
-
+        });
+        //gatt_service.connect();
+        color_buffer = new ArrayList<Byte>();
         setContentView(R.layout.activity_ledcontrol);
         red = (SeekBar)findViewById(R.id.red);
         green = (SeekBar)findViewById(R.id.green);
         blue = (SeekBar)findViewById(R.id.blue);
-        color_buffer = ""; red_value = 0; green_value = 0; blue_value = 0;
+        red_value = 0; green_value = 0; blue_value = 0;
         preview = (ImageView)findViewById(R.id.preview);
         stripPreview = (LinearLayout)findViewById(R.id.stripPreview);
         add = (Button)findViewById(R.id.add);
@@ -162,9 +162,9 @@ public class LEDControl extends Activity {
 
             @Override
             public void onClick(View v) {
-                color_buffer += (byte)red_value;
-                color_buffer += (byte)green_value;
-                color_buffer += (byte)blue_value;
+                color_buffer.add((byte)red_value);
+                color_buffer.add((byte)green_value);
+                color_buffer.add((byte)blue_value);
                 ImageView cSquare = new ImageView(getBaseContext());
                 LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(20,20);
                 p.setMargins(2,0,2,0);
@@ -180,28 +180,36 @@ public class LEDControl extends Activity {
             @Override
             public void onClick(View v) {
                 //Write massive string
-                rgb_gatt.setValue(color_buffer);
-                gatt_service.writeCharacteristic(rgb_gatt);
-                color_buffer = "";
+                Log.d("LED data:", color_buffer.toString());
+                //gatt_service.beginReliableWrite();
+                Log.d("GATT", "RGB: " + rgb_gatt.setValue(color_buffer.toString()));
+                Log.d("GATT", "gatt service write: " + gatt_service.writeCharacteristic(rgb_gatt));
+
+                color_buffer.clear();
                 stripPreview.removeAllViews();
 
-                cmd_gatt.setValue(0, BluetoothGattCharacteristic.FORMAT_UINT8, 0);
-                gatt_service.writeCharacteristic(cmd_gatt);
+                Log.d("GATT", "CMD: " + cmd_gatt.setValue(new byte[]{0x00}));
+                Log.d("GATT", "gatt service write: " + gatt_service.writeCharacteristic(cmd_gatt));
+                //gatt_service.executeReliableWrite();
             }
         });
         clear.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
-                cmd_gatt.setValue(2, BluetoothGattCharacteristic.FORMAT_UINT8, 0);
+                //gatt_service.beginReliableWrite();
+                cmd_gatt.setValue(new byte[]{2});
                 gatt_service.writeCharacteristic(cmd_gatt);
+                //gatt_service.executeReliableWrite();
             }
         });
         set_led_count.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int leds = Integer.parseInt(led_count.getText().toString());
+                //gatt_service.beginReliableWrite();
                 cmd_gatt.setValue((short) leds, BluetoothGattCharacteristic.FORMAT_UINT16, 0);
                 gatt_service.writeCharacteristic(cmd_gatt);
+                //gatt_service.executeReliableWrite();
             }
         });
 

@@ -45,6 +45,7 @@ public class FindDevice extends Activity {
     HashMap<String, BluetoothDevice> devices;
     List<HashMap<String, String>> fillMaps;
     SimpleAdapter listadapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,8 +55,34 @@ public class FindDevice extends Activity {
                     Toast.LENGTH_SHORT).show();
             finish();
         }
+
         manager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         adapter = manager.getAdapter();
+        le = adapter.getBluetoothLeScanner();
+        sc = new ScanCallback() {
+            @Override
+            public void onScanResult(int callbackType, ScanResult result) {
+
+                updateResults(result);
+                listadapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onBatchScanResults(List<ScanResult> results) {
+
+                for (ScanResult r : results) {
+
+                    updateResults(r);
+                }
+
+                listadapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onScanFailed(int errorCode) {
+                Log.e("Scan Failed", "Error Code: " + errorCode);
+            }
+        };
         fillMaps = new ArrayList<HashMap<String, String>>();
         deviceList = (ListView)findViewById(R.id.deviceListView);
         devices = new HashMap<>();
@@ -68,6 +95,7 @@ public class FindDevice extends Activity {
                 Intent i = new Intent(getApplicationContext(), LEDControl.class);
                 i.putExtra("BluetoothDevice", btDevice);
                 startActivity(i);
+                le.stopScan(sc);
             }
         });
         tryEnableBt();
@@ -103,7 +131,6 @@ public class FindDevice extends Activity {
 
     protected void updateResults(ScanResult r)
     {
-        Log.i("ScanResult - Results", r.toString());
         devices.put(r.getDevice().getAddress(), r.getDevice());
         HashMap<String, String> map;
         for(HashMap<String, String> row : fillMaps) {
@@ -130,42 +157,18 @@ public class FindDevice extends Activity {
         List<ScanFilter> filters = new ArrayList<>();
         filters.add(new ScanFilter.Builder()
                 //.setDeviceName("LED Strip")
-                //.setServiceUuid(android.os.ParcelUuid.fromString("47f1de41-c535-414f-a747-1184246636c6"))
-                .build());
+                .setServiceUuid(android.os.ParcelUuid.fromString("47f1de41-c535-414f-a747-1184246636c6"))
+                        .build());
         ScanSettings ss = new ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
                 .build();
-        this.le = adapter.getBluetoothLeScanner();
+
         String[] from = new String[] {"devicename", "rssi", "mac"};
         int[] to = new int[] {R.id.devicename, R.id.rssi, R.id.mac};
         listadapter = new SimpleAdapter(this, fillMaps, R.layout.device_row, from, to);
         deviceList.setAdapter(listadapter);
-        sc = new ScanCallback() {
-            @Override
-            public void onScanResult(int callbackType, ScanResult result) {
 
-                updateResults(result);
-                listadapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onBatchScanResults(List<ScanResult> results) {
-
-                for (ScanResult r : results) {
-
-                    updateResults(r);
-                }
-
-                listadapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onScanFailed(int errorCode) {
-                Log.e("Scan Failed", "Error Code: " + errorCode);
-            }
-        };
-
-        le.startScan(filters, ss, sc);
+        this.le.startScan(filters, ss, this.sc);
 
     }
 
