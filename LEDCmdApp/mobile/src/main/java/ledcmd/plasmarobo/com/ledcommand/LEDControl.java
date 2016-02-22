@@ -1,5 +1,6 @@
 package ledcmd.plasmarobo.com.ledcommand;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -26,9 +27,12 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
@@ -51,6 +55,7 @@ public class LEDControl extends Activity {
     private int green_value;
     private int blue_value;
     private String color_buffer;
+    private LinearLayout stripPreview;
     private BluetoothDevice bt;
     private BluetoothGatt gatt_service;
     private BluetoothGattCharacteristic rgb_gatt;
@@ -125,6 +130,7 @@ public class LEDControl extends Activity {
         blue = (SeekBar)findViewById(R.id.blue);
         color_buffer = ""; red_value = 0; green_value = 0; blue_value = 0;
         preview = (ImageView)findViewById(R.id.preview);
+        stripPreview = (LinearLayout)findViewById(R.id.stripPreview);
         add = (Button)findViewById(R.id.add);
         write = (Button)findViewById(R.id.write);
         clear = (Button)findViewById(R.id.clear);
@@ -159,6 +165,15 @@ public class LEDControl extends Activity {
                 color_buffer += (byte)red_value;
                 color_buffer += (byte)green_value;
                 color_buffer += (byte)blue_value;
+                ImageView cSquare = new ImageView(getBaseContext());
+                LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(20,20);
+                p.setMargins(2,0,2,0);
+                cSquare.setLayoutParams(p);
+                cSquare.setMinimumHeight(20);
+                cSquare.setMinimumWidth(20);
+                cSquare.setBackgroundColor(Color.rgb(red_value, green_value, blue_value));
+                stripPreview.addView(cSquare);
+
             }
         });
         write.setOnClickListener(new Button.OnClickListener() {
@@ -167,6 +182,8 @@ public class LEDControl extends Activity {
                 //Write massive string
                 rgb_gatt.setValue(color_buffer);
                 gatt_service.writeCharacteristic(rgb_gatt);
+                color_buffer = "";
+                stripPreview.removeAllViews();
 
                 cmd_gatt.setValue(0, BluetoothGattCharacteristic.FORMAT_UINT8, 0);
                 gatt_service.writeCharacteristic(cmd_gatt);
@@ -225,6 +242,7 @@ public class LEDControl extends Activity {
     protected void onPause() {
         super.onPause();
         gatt_service.disconnect();
+        gatt_service.close();
     }
 
     protected void onResume(){

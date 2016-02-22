@@ -63,7 +63,6 @@ public class FindDevice extends Activity {
         deviceList.setOnItemClickListener(new ListView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                le.stopScan(sc);
                 String mac = ((HashMap<String, String>)parent.getItemAtPosition(position)).get("mac");
                 BluetoothDevice btDevice = devices.get(mac);
                 Intent i = new Intent(getApplicationContext(), LEDControl.class);
@@ -78,6 +77,11 @@ public class FindDevice extends Activity {
     protected void onResume() {
         super.onResume();
         tryEnableBt();
+    }
+
+    protected void onPause(){
+        super.onPause();
+        this.le.stopScan(this.sc);
     }
 
     protected void tryEnableBt() {
@@ -131,7 +135,7 @@ public class FindDevice extends Activity {
         ScanSettings ss = new ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
                 .build();
-        le = adapter.getBluetoothLeScanner();
+        this.le = adapter.getBluetoothLeScanner();
         String[] from = new String[] {"devicename", "rssi", "mac"};
         int[] to = new int[] {R.id.devicename, R.id.rssi, R.id.mac};
         listadapter = new SimpleAdapter(this, fillMaps, R.layout.device_row, from, to);
