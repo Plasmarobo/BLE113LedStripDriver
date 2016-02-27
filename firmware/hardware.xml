@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<hardware>
+	<usart channel="0" 
+			mode="spi_master" 
+			alternate="1" 
+			polarity="negative"
+			phase="0"
+			endianness="msb" 
+			baud="20000000" 
+			endpoint="none"
+			flow="false"/>
+	<usart channel="1" alternate="2" baud="115200" endpoint="none" flow="false" />
+	<script enable="true" />
+	<script_timeout value="0" />
+	<sleeposc enable="false" />
+    <usb enable="false" endpoint="none" />
+    <sleep enable="false" />
+    <txpower power="15" bias="5" />
+	<connections value="1" />
+	<throughput optimize="performance" />
+</hardware>
