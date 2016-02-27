@@ -29,6 +29,7 @@
 0:0	c_led_data
 0:0	c_manufacturer_name
 0:0	c_model_number
+0:0	c_uart
 0:0	connection_completed
 0:0	connection_connected
 0:0	connection_encrypted
@@ -82,7 +83,6 @@
 0:0	system_endpoint_uart0
 0:0	system_endpoint_uart1
 0:0	system_endpoint_usb
-0:0	xgatt_debug
 0:0	MAX_METERS
 0:0	MAX_LEDS
 0:0	MAX_DATA_LEN

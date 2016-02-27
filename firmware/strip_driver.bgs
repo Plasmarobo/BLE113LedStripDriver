@@ -174,7 +174,7 @@ event system_boot(major, minor, patch, build,ll_version, protocol,hw)
 	connected = 0
 	write_ptr = 0
 	read_ptr = 0
-	uart_enabled = 0
+	uart_enabled = 1
 	
 	call set_strip_info(160)
 	
@@ -212,7 +212,7 @@ end
 
 event attributes_status(handle, flags)
 
-    if (handle = xgatt_debug) && (flags = 2) then
+    if (handle = c_uart) && (flags = 2) then
     
        call system_endpoint_set_watermarks(system_endpoint_uart1, 1, 0) # set RX watermark
        
@@ -228,13 +228,13 @@ event system_endpoint_watermark_rx(endpoint, size)
     end if
     call system_endpoint_set_watermarks(system_endpoint_uart1, 0, $ff) # disable RX watermark
     call system_endpoint_rx(system_endpoint_uart1, in_len)(result, in_len, in(0:in_len))
-    call attributes_write(xgatt_debug, 0, in_len, in(0:in_len))
+    call attributes_write(c_uart, 0, in_len, in(0:in_len))
     
 end
 
 event attclient_indicated(connection, handle)
 
-    if handle = xgatt_debug then
+    if handle = c_uart then
         call system_endpoint_set_watermarks(system_endpoint_uart1, 1, $ff) # set RX watermark
     end if
     
@@ -259,7 +259,7 @@ event attributes_value(connection, reason, handle, offset, vlen, value_data)
 		end while
 	end if 
 	
-	if handle = xgatt_debug then
+	if handle = c_uart then
 		uart_enabled = 1
         out(0:vlen) = value_data(0:vlen)
         out_len = vlen
@@ -313,7 +313,7 @@ event system_endpoint_watermark_rx(endpoint, size)
     call system_endpoint_set_watermarks(system_endpoint_uart1, 0, $ff) # disable RX watermark
     call system_endpoint_rx(system_endpoint_uart1, in_len)(result, in_len, in(0:in_len)) # read data from UART
     call system_endpoint_set_watermarks(system_endpoint_uart1, 10, $ff) # enable RX watermark
-    call attributes_write(xgatt_debug, 0, in_len, in(0:in_len)) # Write data to GATT
+    call attributes_write(c_uart, 0, in_len, in(0:in_len)) # Write data to GATT
   end if
 end
 

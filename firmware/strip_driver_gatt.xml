@@ -38,13 +38,15 @@
             <properties read="true" const="true" />
             <value>LED Strip Driver</value>
         </characteristic>
-		
-		<characteristic uuid="e7add780-b042-4876-aae1-112855353cc1" id="xgatt_debug">
+    </service>
+
+	<service uuid="8f192a8d-6cd2-4611-9f8f-b4e8bcb5e650" advertise="true">
+		<characteristic uuid="e7add780-b042-4876-aae1-112855353cc1" id="c_uart">
 			<description>UART</description>
 			<properties read="true" write="true" />
 			<value variable_length="true" type="user" />
 		</characteristic>
-    </service>
+	</service>
 
     <!-- custom service for providing and controlling slave behavior -->
     <service uuid="47f1de41-c535-414f-a747-1184246636c6" advertise="true">
