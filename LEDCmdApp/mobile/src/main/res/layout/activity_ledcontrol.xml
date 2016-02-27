@@ -20,6 +20,23 @@
         android:layout_marginTop="20dp"
         android:background="#000000" />
 
+    <HorizontalScrollView
+        android:id="@+id/stripPreviewScoll"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_gravity="center"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/stripPreview">
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -97,13 +114,15 @@
             android:layout_height="wrap_content"
             android:text="Write"
             android:id="@+id/write"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:enabled="false" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Clear"
-            android:id="@+id/clear" />
+            android:id="@+id/clear"
+            android:enabled="false" />
     </LinearLayout>
 
     <TextView
@@ -128,6 +147,7 @@
         android:layout_height="wrap_content"
         android:text="Set Led Count"
         android:id="@+id/set_count"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:enabled="false" />
 
 </LinearLayout>

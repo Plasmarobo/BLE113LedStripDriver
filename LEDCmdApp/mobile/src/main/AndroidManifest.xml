@@ -6,7 +6,6 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 
-
     <uses-feature
         android:name="android.bluetooth.le"
         android:required="true" />
@@ -36,6 +35,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="ledcmd.plasmarobo.com.led.BluetoothStripDriver"
+            android:label="@string/title_activity_bluetooth_strip_driver" />
+        <activity
+            android:name="ledcmd.plasmarobo.com.services.LEDStripBluetooth"
+            android:label="@string/title_activity_ledstrip_bluetooth" />
+
     </application>
 
 </manifest>
