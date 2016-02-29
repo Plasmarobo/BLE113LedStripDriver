@@ -1,150 +1,161 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<android.support.v4.view.ViewPager
+    android:layout_height="wrap_content"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    tools:context="ledcmd.plasmarobo.com.ledcommand.LEDControl"
-    android:orientation="vertical">
-
-    <ImageView
-        android:layout_width="128dp"
-        android:layout_height="128dp"
-        android:id="@+id/preview"
-        android:layout_gravity="center_horizontal"
-        android:minHeight="128dp"
-        android:minWidth="128dp"
-        android:maxWidth="128dp"
-        android:maxHeight="128dp"
-        android:layout_marginTop="20dp"
-        android:background="#000000" />
-
-    <HorizontalScrollView
-        android:id="@+id/stripPreviewScoll"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:layout_gravity="center"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp">
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        tools:context="ledcmd.plasmarobo.com.ledcommand.LEDControl"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="128dp"
+            android:layout_height="128dp"
+            android:id="@+id/preview"
+            android:layout_gravity="center_horizontal"
+            android:minHeight="128dp"
+            android:minWidth="128dp"
+            android:maxWidth="128dp"
+            android:maxHeight="128dp"
+            android:layout_marginTop="20dp"
+            android:background="#000000" />
+
+        <HorizontalScrollView
+            android:id="@+id/stripPreviewScoll"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/stripPreview">
+
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Red"
+            android:id="@+id/textView3"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp" />
+
+        <SeekBar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/red"
+            android:layout_gravity="center_horizontal"
+            android:max="255"
+            android:indeterminate="false"
+            android:layout_marginTop="20dp"
+            android:progress="0" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Green"
+            android:id="@+id/textView2"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp" />
+
+        <SeekBar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/green"
+            android:layout_gravity="center_horizontal"
+            android:indeterminate="false"
+            android:max="255"
+            android:layout_marginTop="20dp"
+            android:progress="0" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Blue"
+            android:id="@+id/textView"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp" />
+
+        <SeekBar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/blue"
+            android:layout_gravity="center_horizontal"
+            android:max="255"
+            android:indeterminate="false"
+            android:layout_marginTop="20dp"
+            android:progress="0" />
 
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/stripPreview">
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:weightSum="1"
+            android:gravity="center_horizontal">
 
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add"
+                android:id="@+id/add"
+                android:layout_gravity="center_horizontal" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Write"
+                android:id="@+id/write"
+                android:layout_gravity="center_horizontal" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Clear"
+                android:id="@+id/clear" />
         </LinearLayout>
-    </HorizontalScrollView>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Red"
-        android:id="@+id/textView3"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="20dp" />
-
-    <SeekBar
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/red"
-        android:layout_gravity="center_horizontal"
-        android:max="255"
-        android:indeterminate="false"
-        android:layout_marginTop="20dp"
-        android:progress="0" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Green"
-        android:id="@+id/textView2"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="20dp" />
-
-    <SeekBar
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/green"
-        android:layout_gravity="center_horizontal"
-        android:indeterminate="false"
-        android:max="255"
-        android:layout_marginTop="20dp"
-        android:progress="0" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Blue"
-        android:id="@+id/textView"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="20dp" />
-
-    <SeekBar
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/blue"
-        android:layout_gravity="center_horizontal"
-        android:max="255"
-        android:indeterminate="false"
-        android:layout_marginTop="20dp"
-        android:progress="0" />
-
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:weightSum="1"
-        android:gravity="center_horizontal">
-
-        <Button
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Add"
-            android:id="@+id/add"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="LED Count"
+            android:id="@+id/textView4"
             android:layout_gravity="center_horizontal" />
 
-        <Button
-            android:layout_width="wrap_content"
+        <EditText
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Write"
-            android:id="@+id/write"
-            android:layout_gravity="center_horizontal" />
+            android:inputType="number"
+            android:ems="10"
+            android:id="@+id/led_count"
+            android:text="160" />
 
         <Button
+            style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Clear"
-            android:id="@+id/clear" />
+            android:text="Set Led Count"
+            android:id="@+id/set_count"
+            android:layout_gravity="center_horizontal" />
+
     </LinearLayout>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="LED Count"
-        android:id="@+id/textView4"
-        android:layout_gravity="center_horizontal" />
-
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="number"
-        android:ems="10"
-        android:id="@+id/led_count"
-        android:text="160" />
-
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Set Led Count"
-        android:id="@+id/set_count"
-        android:layout_gravity="center_horizontal" />
-
-</LinearLayout>
+    <ListView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/patternListView"
+        android:layout_centerVertical="true"
+        android:layout_alignParentEnd="true" />
+</android.support.v4.view.ViewPager>

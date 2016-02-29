@@ -13,10 +13,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.SeekBar;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import ledcmd.plasmarobo.com.ledcommand.Patterns.PatternManager;
 
 public class LEDControl extends Activity implements BluetoothLink.Callback {
     private BluetoothDevice device;
@@ -35,6 +38,7 @@ public class LEDControl extends Activity implements BluetoothLink.Callback {
     private int blue_value;
     private List<Byte> color_buffer;
     private LinearLayout stripPreview;
+    private PatternManager patternManager;
 
     private BluetoothLink link;
     private final String TAG = "LEDStrip";
@@ -103,12 +107,12 @@ public class LEDControl extends Activity implements BluetoothLink.Callback {
 
             @Override
             public void onClick(View v) {
-                color_buffer.add((byte)red_value);
-                color_buffer.add((byte)green_value);
-                color_buffer.add((byte)blue_value);
+                color_buffer.add((byte) red_value);
+                color_buffer.add((byte) green_value);
+                color_buffer.add((byte) blue_value);
                 ImageView cSquare = new ImageView(getBaseContext());
-                LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(20,20);
-                p.setMargins(2,0,2,0);
+                LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(20, 20);
+                p.setMargins(2, 0, 2, 0);
                 cSquare.setLayoutParams(p);
                 cSquare.setMinimumHeight(20);
                 cSquare.setMinimumWidth(20);
@@ -149,6 +153,9 @@ public class LEDControl extends Activity implements BluetoothLink.Callback {
                 link.writeLEDCount(Short.parseShort(led_count.getText().toString()));
             }
         });
+
+        patternManager = new PatternManager(link);
+        patternManager.populateListView(this, (ListView)findViewById(R.id.patternListView));
 
     }
 

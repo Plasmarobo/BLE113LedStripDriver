@@ -68,6 +68,7 @@ public class BluetoothLink extends BluetoothGattCallback implements BluetoothAda
     // Queues for characteristic read (synchronous)
     private Queue<BluetoothGattCharacteristic> readQueue;
     private Queue<Pair<BluetoothGattCharacteristic,byte[]>> writeQueue;
+    private short ledCount;
 
     // Interface for a BluetoothLink client to be notified of UART actions.
     public interface Callback {
@@ -101,6 +102,7 @@ public class BluetoothLink extends BluetoothGattCallback implements BluetoothAda
         this.readQueue = new ConcurrentLinkedQueue<BluetoothGattCharacteristic>();
         this.writeQueue = new ConcurrentLinkedQueue<Pair<BluetoothGattCharacteristic, byte[]>>();
         this.timeoutHandler = new Handler();
+        this.ledCount = 0;
     }
 
     // Return instance of BluetoothGatt.
@@ -212,10 +214,16 @@ public class BluetoothLink extends BluetoothGattCallback implements BluetoothAda
     // Set LED Count
     public void writeLEDCount(short ledCount)
     {
+        this.ledCount = ledCount;
         ByteBuffer b = ByteBuffer.allocate(3);
         b.put((byte)0x01);
         b.putShort(ledCount);
         write(b.array(), ledCommand);
+    }
+
+    public short getLedCount()
+    {
+        return ledCount;
     }
 
     // Register the specified callback to receive UART callbacks.
