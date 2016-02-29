@@ -1,10 +1,8 @@
 <resources>
     <string name="app_name">LED Command</string>
     <string name="action_settings">Settings</string>
-    <string name="title_activity_find_device">Find Device</string>
+    <string name="title_activity_find_device">LED Strip</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_activity_bluetooth_strip_driver">BluetoothStripDriver</string>
-    <string name="title_activity_ledstrip_bluetooth">LEDStripBluetooth</string>
+    <string name="title_activity_bluetooth_strip_driver">LED Strip Driver</string>
+    <string name="title_activity_ledstrip_bluetooth">LED Strip</string>
 </resources>

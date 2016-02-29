@@ -146,7 +146,7 @@ public class FindDevice extends Activity {
         List<ScanFilter> filters = new ArrayList<>();
         filters.add(new ScanFilter.Builder()
                 //.setDeviceName("LED Strip")
-                .setServiceUuid(android.os.ParcelUuid.fromString("8f192a8d-6cd2-4611-9f8f-b4e8bcb5e650"))
+                //.setServiceUuid(android.os.ParcelUuid.fromString("8f192a8d-6cd2-4611-9f8f-b4e8bcb5e650"))
                         .build());
         ScanSettings ss = new ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
