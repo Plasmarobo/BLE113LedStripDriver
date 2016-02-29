@@ -82,6 +82,7 @@ public class BluetoothLink extends BluetoothGattCallback implements BluetoothAda
     // Timeouts
     private Handler timeoutHandler;
     private final int WRITE_TIMEOUT = 10000;
+    private final int DEVICE_PAYLOAD_LIMIT = 9; // For debug firmware
 
     public BluetoothLink(Context context) {
         super();
@@ -98,6 +99,7 @@ public class BluetoothLink extends BluetoothGattCallback implements BluetoothAda
         this.connectFirst = false;
         this.writeInProgress = false;
         this.readQueue = new ConcurrentLinkedQueue<BluetoothGattCharacteristic>();
+        this.writeQueue = new ConcurrentLinkedQueue<Pair<BluetoothGattCharacteristic, byte[]>>();
         this.timeoutHandler = new Handler();
     }
 
@@ -133,23 +135,28 @@ public class BluetoothLink extends BluetoothGattCallback implements BluetoothAda
 
     public void write(byte[] data, BluetoothGattCharacteristic characteristic)
     {
+        if (characteristic == null || data == null || data.length == 0) {
+            // Do nothing if there is no connection or message to send.
+            return;
+        }
         int index = 0;
         int offset = 0;
-        while(offset < data.length) {
-            int length = Math.min(data.length - offset, 18);
+        while (offset < data.length) {
+            int length = Math.min(data.length - offset, DEVICE_PAYLOAD_LIMIT);
             byte[] buffer = new byte[length];
-            for(int i = 0; i < length; ++i)
-            {
-               buffer[i] = data[offset + i];
+            for (int i = 0; i < length; ++i) {
+                buffer[i] = data[offset + i];
             }
+            Log.d(TAG, "Enqueued " + buffer.length + " bytes");
             writeQueue.add(new Pair(characteristic, buffer));
             offset += length;
         }
 
-       if (writeInProgress == false) {
-           Pair<BluetoothGattCharacteristic, byte[]> p = writeQueue.remove();
-           send(p.second, p.first);
-       }
+        if (writeInProgress == false) {
+            Pair<BluetoothGattCharacteristic, byte[]> p = writeQueue.remove();
+            send(p.second, p.first);
+        }
+
     }
 
     // Send data to connected UART device.
@@ -158,6 +165,7 @@ public class BluetoothLink extends BluetoothGattCallback implements BluetoothAda
             // Do nothing if there is no connection or message to send.
             return;
         }
+        Log.d(TAG, "Sent " + data.length + " bytes");
         characteristic.setValue(data);
         writeInProgress = true; // Set the write in progress flag
         gatt.writeCharacteristic(characteristic);
@@ -341,11 +349,13 @@ public class BluetoothLink extends BluetoothGattCallback implements BluetoothAda
         }
         if(writeQueue.size() > 0) {
            //Align to thee bytes
+            Log.d(TAG, "Writing next queued element");
             Pair<BluetoothGattCharacteristic, byte[]> p = writeQueue.remove();
             send(p.second, p.first);
         }
         else
         {
+            Log.d(TAG, "Write Queue Exhausted");
             writeInProgress = false;
         }
     }
