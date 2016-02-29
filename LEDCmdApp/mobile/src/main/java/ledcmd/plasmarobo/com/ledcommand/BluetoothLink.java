@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
+import android.util.Pair;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -66,6 +67,7 @@ public class BluetoothLink extends BluetoothGattCallback implements BluetoothAda
 
     // Queues for characteristic read (synchronous)
     private Queue<BluetoothGattCharacteristic> readQueue;
+    private Queue<Pair<BluetoothGattCharacteristic,byte[]>> writeQueue;
 
     // Interface for a BluetoothLink client to be notified of UART actions.
     public interface Callback {
@@ -129,6 +131,27 @@ public class BluetoothLink extends BluetoothGattCallback implements BluetoothAda
 
     public boolean deviceInfoAvailable() { return disAvailable; }
 
+    public void write(byte[] data, BluetoothGattCharacteristic characteristic)
+    {
+        int index = 0;
+        int offset = 0;
+        while(offset < data.length) {
+            int length = Math.min(data.length - offset, 18);
+            byte[] buffer = new byte[length];
+            for(int i = 0; i < length; ++i)
+            {
+               buffer[i] = data[offset + i];
+            }
+            writeQueue.add(new Pair(characteristic, buffer));
+            offset += length;
+        }
+
+       if (writeInProgress == false) {
+           Pair<BluetoothGattCharacteristic, byte[]> p = writeQueue.remove();
+           send(p.second, p.first);
+       }
+    }
+
     // Send data to connected UART device.
     public void send(byte[] data, BluetoothGattCharacteristic characteristic) {
         if (characteristic == null || data == null || data.length == 0) {
@@ -138,17 +161,6 @@ public class BluetoothLink extends BluetoothGattCallback implements BluetoothAda
         characteristic.setValue(data);
         writeInProgress = true; // Set the write in progress flag
         gatt.writeCharacteristic(characteristic);
-
-        Runnable writeTimeout = new Runnable() {
-            @Override
-            public void run() {
-                writeInProgress = false;
-            }
-        };
-
-        timeoutHandler.postDelayed(writeTimeout, WRITE_TIMEOUT);
-        while (writeInProgress); // Wait for the flag to clear in onCharacteristicWrite
-        timeoutHandler.removeCallbacks(writeTimeout);
     }
 
     // Send data to connected device.
@@ -168,33 +180,34 @@ public class BluetoothLink extends BluetoothGattCallback implements BluetoothAda
     }
 
     // Send Color Array
-    public void sendColor(byte[] data)
+    public void writeColor(byte[] data)
     {
         if((data.length % 3) == 0)
         {
-            send(data, ledData);
+            write(data, ledData);
         }
     }
 
     // Send Write Command
-    public void sendWrite()
+    public void writeUpdate()
     {
-        send(new byte[] {0x00}, ledCommand);
+
+        write(new byte[]{0x00}, ledCommand);
     }
 
     // Send Clear Command
-    public void sendClear()
+    public void writeClear()
     {
-        send(new byte[] {0x02}, ledCommand);
+        write(new byte[]{0x02}, ledCommand);
     }
 
     // Set LED Count
-    public void sendLEDCount(short ledCount)
+    public void writeLEDCount(short ledCount)
     {
         ByteBuffer b = ByteBuffer.allocate(3);
         b.put((byte)0x01);
         b.putShort(ledCount);
-        send(b.array(), ledCommand);
+        write(b.array(), ledCommand);
     }
 
     // Register the specified callback to receive UART callbacks.
@@ -326,7 +339,15 @@ public class BluetoothLink extends BluetoothGattCallback implements BluetoothAda
         if (status == BluetoothGatt.GATT_SUCCESS) {
             Log.d(TAG, "Characteristic write successful");
         }
-        writeInProgress = false;
+        if(writeQueue.size() > 0) {
+           //Align to thee bytes
+            Pair<BluetoothGattCharacteristic, byte[]> p = writeQueue.remove();
+            send(p.second, p.first);
+        }
+        else
+        {
+            writeInProgress = false;
+        }
     }
 
     @Override

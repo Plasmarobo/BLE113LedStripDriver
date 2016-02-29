@@ -2,10 +2,6 @@ package ledcmd.plasmarobo.com.ledcommand;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
@@ -15,25 +11,18 @@ import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.app.Activity;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 
 public class FindDevice extends Activity {
     public final int REQUEST_ENABLE_BT = 32;
@@ -157,7 +146,7 @@ public class FindDevice extends Activity {
         List<ScanFilter> filters = new ArrayList<>();
         filters.add(new ScanFilter.Builder()
                 //.setDeviceName("LED Strip")
-                .setServiceUuid(android.os.ParcelUuid.fromString("47f1de41-c535-414f-a747-1184246636c6"))
+                .setServiceUuid(android.os.ParcelUuid.fromString("8f192a8d-6cd2-4611-9f8f-b4e8bcb5e650"))
                         .build());
         ScanSettings ss = new ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
