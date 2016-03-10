@@ -3,6 +3,8 @@ package ledcmd.plasmarobo.com.ledcommand.Patterns;
 import android.content.Context;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -12,6 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import ledcmd.plasmarobo.com.ledcommand.BluetoothLink;
 import ledcmd.plasmarobo.com.ledcommand.R;
@@ -23,14 +27,14 @@ public class PatternManager {
     private BluetoothLink link;
     private ColorPattern currentPattern;
     private HashMap<String, ColorPattern> patterns;
-    private int updateInterval;
-    private Timer updateTimer;
-    private SimpleAdapter listadapter;
+    private int updateInterval; //Miliseconds
+    private ScheduledThreadPoolExecutor updateTimer;
 
     public PatternManager(BluetoothLink l)
     {
         link = l;
-        updateTimer = new Timer();
+        updateTimer = null;
+        updateInterval = 1000;
         patterns = new HashMap<String, ColorPattern>();
         patterns.put("RainbowWave", new RainbowWavePattern());
         patterns.put("Cylon", new CylonPattern());
@@ -51,46 +55,48 @@ public class PatternManager {
 
     private void writePattern()
     {
+        link.writeClear();
         link.writeColor(currentPattern.getPattern());
         link.writeUpdate();
     }
 
     public void start()
     {
-        updateTimer.scheduleAtFixedRate(new TimerTask() {
-                                            @Override
-                                            public void run() {
-                                                currentPattern.tick();
-                                                writePattern();
-                                            }
-                                        },
-                0,
-                updateInterval);
+        stop();
+        updateTimer = new ScheduledThreadPoolExecutor(2);
+        updateTimer.scheduleWithFixedDelay(new Runnable() {
+            @Override
+            public void run() {
+                currentPattern.tick();
+                writePattern();
+            }
+        }, 0, updateInterval, TimeUnit.MILLISECONDS);
     }
 
     public void  stop()
     {
-        updateTimer.cancel();
+        if(updateTimer != null) updateTimer.shutdown();
+        updateTimer = null;
     }
 
-    public void populateListView(Context context, ListView list)
+    public void populateLayout(Context context, LinearLayout list)
     {
-        String[] from = new String[] {"pattern_name"};
-        int[] to = new int[] {R.id.patternname};
-        List<HashMap<String, ColorPattern>> fillMap = new ArrayList<>();
-        fillMap.add(patterns);
-        listadapter = new SimpleAdapter(context, fillMap, R.layout.pattern_row, from, to);
-        list.setAdapter(listadapter);
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View view,
-                                    int position, long id) {
-                stop();
-                // selected item
-                String selected = ((TextView) view.findViewById(R.id.patternname)).getText().toString();
-                SetPattern(patterns.get(selected));
-                start();
-            }
-        });
+        for(String name : this.patterns.keySet())
+        {
+            Button b = new Button(context);
+            b.setText(name);
+            b.setOnClickListener(new Button.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    stop();
+                    SetPattern(patterns.get(((Button) v).getText()));
+                    start();
+                }
+            });
+            list.addView(b);
+        }
+
 
     }
 

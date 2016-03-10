@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.app.Activity;
+import android.os.ParcelUuid;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -23,6 +24,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 public class FindDevice extends Activity {
     public final int REQUEST_ENABLE_BT = 32;
@@ -123,29 +125,34 @@ public class FindDevice extends Activity {
         devices.put(r.getDevice().getAddress(), r.getDevice());
         HashMap<String, String> map;
         for(HashMap<String, String> row : fillMaps) {
-            if(r.getDevice().getName() == "LED Strip") {
-                String addr1 = row.get("mac");
-                String addr2 = r.getDevice().getAddress();
-                if (addr1.equals(addr2)) {
-                    row.put("devicename", r.getDevice().getName());
-                    row.put("rssi", Integer.toString(r.getRssi()));
-                    row.put("mac", r.getDevice().getAddress());
-                    return;
-                }
+            String addr1 = row.get("mac");
+            String addr2 = r.getDevice().getAddress();
+            if (addr1.equals(addr2)) {
+                row.put("devicename", r.getDevice().getName());
+                row.put("rssi", Integer.toString(r.getRssi()));
+                row.put("mac", r.getDevice().getAddress());
+                return;
             }
-        }
-        map = new HashMap<String, String>();
-        map.put("devicename", r.getDevice().getName());
-        map.put("rssi", Integer.toString(r.getRssi()));
-        map.put("mac", r.getDevice().getAddress());
 
-        fillMaps.add(map);
+        }
+        //String name = r.getDevice().getName();
+        //Log.v("LED", "Found device: <" + name + ">");
+        //if(name != null && name.equals("LED Strip"))
+        //{
+            map = new HashMap<String, String>();
+            map.put("devicename", r.getDevice().getName());
+            map.put("rssi", Integer.toString(r.getRssi()));
+            map.put("mac", r.getDevice().getAddress());
+            fillMaps.add(map);
+        //}
+
     }
 
     protected void findDevice()
     {
         List<ScanFilter> filters = new ArrayList<>();
         filters.add(new ScanFilter.Builder()
+                //.setServiceUuid(ParcelUuid.fromString("8f192a8d-6cd2-4611-9f8f-b4e8bcb5e650"))
                 .build());
         ScanSettings ss = new ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)

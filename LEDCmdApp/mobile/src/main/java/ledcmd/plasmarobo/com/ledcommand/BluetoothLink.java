@@ -102,7 +102,7 @@ public class BluetoothLink extends BluetoothGattCallback implements BluetoothAda
         this.readQueue = new ConcurrentLinkedQueue<BluetoothGattCharacteristic>();
         this.writeQueue = new ConcurrentLinkedQueue<Pair<BluetoothGattCharacteristic, byte[]>>();
         this.timeoutHandler = new Handler();
-        this.ledCount = 0;
+        this.ledCount = 160;
     }
 
     // Return instance of BluetoothGatt.

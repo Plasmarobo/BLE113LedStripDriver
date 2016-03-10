@@ -1,10 +1,12 @@
 package ledcmd.plasmarobo.com.ledcommand;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
@@ -38,6 +40,7 @@ public class LEDControl extends Activity implements BluetoothLink.Callback {
     private int blue_value;
     private List<Byte> color_buffer;
     private LinearLayout stripPreview;
+    private LinearLayout stripPatterns;
     private PatternManager patternManager;
 
     private BluetoothLink link;
@@ -66,6 +69,7 @@ public class LEDControl extends Activity implements BluetoothLink.Callback {
         link.setDevice(device);
         color_buffer = new ArrayList<Byte>();
         setContentView(R.layout.activity_ledcontrol);
+
         red = (SeekBar)findViewById(R.id.red);
         green = (SeekBar)findViewById(R.id.green);
         blue = (SeekBar)findViewById(R.id.blue);
@@ -154,8 +158,10 @@ public class LEDControl extends Activity implements BluetoothLink.Callback {
             }
         });
 
+        stripPatterns = (LinearLayout)findViewById(R.id.stripPatterns);
+
         patternManager = new PatternManager(link);
-        patternManager.populateListView(this, (ListView)findViewById(R.id.patternListView));
+        patternManager.populateLayout(this, stripPatterns );
 
     }
 

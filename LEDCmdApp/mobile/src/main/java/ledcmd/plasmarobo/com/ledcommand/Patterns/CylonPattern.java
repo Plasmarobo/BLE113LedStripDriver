@@ -9,6 +9,7 @@ public class CylonPattern extends BasicPattern {
     private int position;
     private final int FORWARD = 1;
     private final int BACKWARDS = -1;
+    private final byte CYCLON_COLOR = 64;
 
     public CylonPattern()
     {
@@ -37,6 +38,7 @@ public class CylonPattern extends BasicPattern {
             position = 0;
             direction = FORWARD;
         }
+        colors[position] = CYCLON_COLOR;
     }
 
 
